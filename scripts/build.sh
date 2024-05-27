@@ -138,6 +138,7 @@ build_requested_canisters() {
         build_canister "icrc2-minter" "export-api" "icrc2-minter.wasm" "icrc2-minter"
         build_canister "erc20-minter" "export-api" "erc20-minter.wasm" "erc20-minter"
         build_canister "btc-bridge" "export-api" "btc-bridge.wasm" "btc-bridge"
+        build_canister "btc-nft-bridge" "export-api" "btc-nft-bridge.wasm" "btc-nft-bridge"
         build_canister "rune-bridge" "export-api" "rune-bridge.wasm" "rune-bridge"
 
         # Build tools

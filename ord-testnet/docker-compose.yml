@@ -1,81 +1,27 @@
 services:
-  db:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
   bitcoind:
+    container_name: bitcoind
     image: lncm/bitcoind:v26.0
     command: ["-txindex", "-regtest"]
     ports:
       - "18443:18443"
       - "18444:18444"
-      # - "8333:8333"
-      # - "8332:8332"
       - "28332:28332"
       - "28333:28333"
     volumes:
       - bitcoin-data:/data/.bitcoin
       - ./bitcoin.conf:/data/.bitcoin/bitcoin.conf
-  ordinals-api:
+  ord:
+    container_name: ord
     build:
-      context: .
-      dockerfile: ordinals-api.dockerfile
-    volumes:
-      - ./ordinals-api.env:/app/ordinals-api/.env
+      dockerfile: ord.dockerfile
+    platform: linux/amd64
     ports:
-      - "3000:3000"
-    depends_on:
-      - db
-  ordhook:
-    build:
-      context: https://github.com/hirosystems/ordhook.git
-      dockerfile: dockerfiles/components/ordhook.dockerfile
-    ports:
-      - "20456:20456"
-    command: ["service", "start", "--post-to=http://ordinals-api:3099/payload", "--auth-token=1", "--config-path=/Ordhook.toml"]
-    volumes:
-      - ./Ordhook.toml:/Ordhook.toml
-    depends_on:
-      - bitcoind
-      - ordinals-api
-  ordinals-explorer:
-    build:
-      context: .
-      dockerfile: ordinals-explorer.dockerfile
-    env_file:
-      - ./ordinals-explorer.env
-    ports:
-      - "1337:3001"
-    volumes:
-      - ./ordinals-explorer.env:/usr/src/ordinals-explorer/.env.production
-    depends_on:
-      - ordinals-api
-  ord-cli:
-    build: https://github.com/ordinals/ord.git
-    container_name: ord-cli
-    command: ["sleep", "infinity"]
-    environment:
-      - ORD_BITCOIN_RPC_USERNAME=user
-      - ORD_BITCOIN_RPC_PASSWORD=pass
+      - "8000:8000"
+      - "8001:8001"
     volumes:
       - ./brc20_json_inscriptions:/brc20_json_inscriptions
-    depends_on:
-      - bitcoind
-  ord:
-    build: https://github.com/ordinals/ord.git
-    command: ["ord", "-r", "--bitcoin-rpc-url", "http://bitcoind:18443", "--index-runes", "server", "--http-port", "1338"]
-    ports:
-      - "1338:1338"
-    environment:
-      - ORD_BITCOIN_RPC_USERNAME=user
-      - ORD_BITCOIN_RPC_PASSWORD=pass
+      - ./nft_json_inscriptions:/nft_json_inscriptions
     depends_on:
       - bitcoind
 

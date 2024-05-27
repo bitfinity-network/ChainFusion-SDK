@@ -30,6 +30,17 @@
       "wasm": ".artifact/erc20-minter.wasm.gz",
       "type": "custom"
     },
+    "btc-nft-bridge": {
+      "build": "",
+      "candid": ".artifact/btc-nft-bridge.did",
+      "wasm": ".artifact/btc-nft-bridge.wasm.gz",
+      "type": "custom",
+      "metadata": [
+        {
+          "name": "candid:service"
+        }
+      ]
+    },
     "rune-bridge": {
       "build": "",
       "candid": ".artifact/rune-bridge.did",

@@ -19,6 +19,7 @@ futures = { workspace = true }
 hex = { workspace = true }
 ic-exports = { workspace = true }
 ic-test-utils = { workspace = true }
+icrc-client = { workspace = true }
 log = { workspace = true }
 minter-client = { workspace = true }
 minter-contract-utils = { path = "../minter-contract-utils" }
@@ -26,4 +27,3 @@ minter-did = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-icrc-client = { workspace = true }

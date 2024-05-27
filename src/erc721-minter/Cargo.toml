@@ -1,0 +1,33 @@
+[package]
+name = "erc721-minter"
+version.workspace = true
+edition.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = []
+export-api = []
+
+[dependencies]
+anyhow = { workspace = true }
+candid = { workspace = true }
+did = { workspace = true }
+ethereum-json-rpc-client = { workspace = true, features = [
+  "ic-canister-client",
+  "http-outcall",
+] }
+ic-canister = { workspace = true }
+ic-canister-client = { workspace = true }
+ic-exports = { workspace = true, features = ["icrc"] }
+ic-metrics = { workspace = true }
+ic-stable-structures = { workspace = true }
+ic-storage = { workspace = true }
+ic-task-scheduler = { workspace = true }
+jsonrpc-core = { workspace = true }
+serde = { workspace = true }
+log = { workspace = true }
+ethers-core = { workspace = true }
+minter-did = { workspace = true }
+minter-contract-utils = { path = "../minter-contract-utils" }
+ic-log = { workspace = true }
+eth-signer = { workspace = true, features = ["ic_sign"] }

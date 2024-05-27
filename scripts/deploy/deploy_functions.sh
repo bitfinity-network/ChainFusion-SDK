@@ -135,6 +135,32 @@ deploy_btc_bridge() {
   dfx canister install --mode=$INSTALL_MODE --yes --wasm=./.artifact/btc-bridge.wasm.gz --network=$NETWORK --argument="$args" btc-bridge
 }
 
+deploy_btc_nft_bridge() {
+  NETWORK="$1"
+  INSTALL_MODE="$2"
+  BITCOIN_NETWORK="$3"
+  ADMIN_PRINCIPAL="$4"
+  EVM_LINK=$(link_to_variant "$5")
+  ORD_URL="$6"
+  SIGNING_STRATEGY="$7"
+  LOG_SETTINGS="$8"
+
+  create_canister $NETWORK btc-nft-bridge
+
+  args="(record {
+    ord_url = \"${ORD_URL}\";
+    admin = principal \"${ADMIN_PRINCIPAL}\";
+    signing_strategy = $SIGNING_STRATEGY;
+    evm_link = $EVM_LINK;
+    network = variant { $BITCOIN_NETWORK };
+    logger = $LOG_SETTINGS;
+  })"
+
+  echo "deploying btc-nft-bridge with args: $args"
+
+  dfx canister install --mode=$INSTALL_MODE --yes --wasm=./.artifact/btc-nft-bridge.wasm.gz --network=$NETWORK --argument="$args" btc-nft-bridge
+}
+
 get_wallet() {
   EVM_PRINCIPAL="$1"
   ETH_WALLET=$($CREATE_BFT_BRIDGE_TOOL create-wallet --evm-canister="$EVM_PRINCIPAL")

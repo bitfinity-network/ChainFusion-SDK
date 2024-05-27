@@ -1,0 +1,30 @@
+[package]
+name = "inscriber"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+async-trait = { workspace = true }
+bitcoin = { version = "0.31", features = ["serde"] }
+bs58 = "0.5"
+candid = { workspace = true }
+ethers-core = { workspace = true }
+eth-signer = { workspace = true }
+did = { workspace = true }
+hex = { workspace = true }
+ic-canister = { workspace = true }
+ic-exports = { workspace = true }
+ic-log = { workspace = true }
+ic-metrics = { workspace = true }
+ic-stable-structures = { workspace = true }
+ic-storage = { workspace = true }
+jsonrpc-core = { workspace = true }
+k256 = { version = "0.13", features = ["ecdsa"] }
+log = { workspace = true }
+ord-rs = { workspace = true }
+ripemd = "0.1"
+serde = { workspace = true }
+serde_bytes = "0.11"
+serde_json = { workspace = true }
+sha2 = "0.10"
+thiserror = { workspace = true }

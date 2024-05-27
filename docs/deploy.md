@@ -6,6 +6,7 @@
   - [Canisters deployment](#canisters-deployment)
     - [BFT Bridge](#bft-bridge)
     - [BTC Bridge](#btc-bridge)
+    - [BTC NFT Bridge](#btc-nft-bridge)
     - [ERC20 Bridge](#erc20-bridge)
     - [ERC721 Bridge](#erc721-bridge)
     - [ICRC2 Minter](#icrc2-minter)
@@ -95,7 +96,43 @@ If deploying on local
 # setup bitcoind
 cd btc-deploy/ && docker-compose up --build -d && cd -
 # deploy btc bridge
-./scripts/deploy/btc-bridge.sh -m <create|install|reinstall|update> -e <evm-principal>
+./scripts/deploy/btc-bridge.sh -m <create|install|reinstall|update>
+```
+
+When deploying on local, this will also deploy the ckbtc ledger and minter canisters.
+By default this will run against the bitcoin regtest
+
+### BTC NFT Bridge
+
+Deploy the Bitcoin NFT bridge
+
+```sh
+./scripts/deploy/btc-nft-bridge.sh --help
+```
+
+```txt
+Options:
+  -h, --help                                      Display this help message
+  -b, --bitcoin-network <network>                 Bitcoin network (regtest, testnet, mainnet) (default: regtest)
+  -e, --evm-principal <principal>                 EVM Principal
+  -i, --ic-network <network>                      Internet Computer network (local, ic) (default: local)
+  -m, --install-mode <mode>                       Install mode (create, init, reinstall, upgrade)
+  --ord-url <ord-url>                             URL of Ord service
+```
+
+If deploying on ic
+
+```sh
+./scripts/deploy/btc-nft-bridge.sh -m <create|install|reinstall|update> -i ic -e <evm-principal> --bitcoin-network mainnet --ord-url <url>
+```
+
+If deploying on local
+
+```sh
+# setup bitcoind
+cd ord-testnet/ && docker-compose up --build -d && cd -
+# deploy btc bridge
+./scripts/deploy/btc-nft-bridge.sh -m <create|install|reinstall|update>
 ```
 
 When deploying on local, this will also deploy the ckbtc ledger and minter canisters.

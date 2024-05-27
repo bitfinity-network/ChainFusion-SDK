@@ -12,8 +12,10 @@ use ethers_core::abi::Token;
 use ethers_core::k256::ecdsa::SigningKey;
 use evm_canister_client::EvmCanisterClient;
 use ic_canister_client::IcAgentClient;
-use minter_contract_utils::build_data::BFT_BRIDGE_SMART_CONTRACT_CODE;
-use minter_contract_utils::{bft_bridge_api, wrapped_token_api};
+use minter_contract_utils::build_data::test_contracts::{
+    BFT_BRIDGE_SMART_CONTRACT_CODE, ERC721_BRIDGE_SMART_CONTRACT_CODE,
+};
+use minter_contract_utils::{bft_bridge_api, erc721_bridge_api, wrapped_token_api};
 use minter_did::id256::Id256;
 use tokio::time::Instant;
 
@@ -27,6 +29,10 @@ const IDENTITY_PATH: &str = "src/create_bft_bridge_tool/identity.pem";
 enum CliCommand {
     /// Create bft bridge contract.
     DeployBftBridge(DeployBftArgs),
+    /// Create NFT bridge contract
+    DeployErc721Bridge(DeployErc721Args),
+    /// Create wrapped erc721 contract.
+    CreateNft(CreateNftArgs),
     /// Create wrapper token contract.
     CreateToken(CreateTokenArgs),
     /// Create a new ETH wallet and mint native tokens to it.
@@ -46,6 +52,44 @@ struct DeployBftArgs {
     /// Principal of the EVM canister
     #[arg(long)]
     evm: Principal,
+
+    /// Hex-encoded PK to use to sign transaction. If not set, a random wallet will be created.
+    #[arg(long)]
+    wallet: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+struct DeployErc721Args {
+    /// ETH address of the minter
+    #[arg(long)]
+    minter_address: String,
+
+    /// Principal of the EVM canister
+    #[arg(long)]
+    evm: Principal,
+
+    /// Hex-encoded PK to use to sign transaction. If not set, a random wallet will be created.
+    #[arg(long)]
+    wallet: Option<String>,
+}
+
+#[derive(Debug, Parser)]
+struct CreateNftArgs {
+    /// ETH address of the BFT bridge contract.
+    #[arg(long)]
+    erc721_bridge_address: String,
+
+    /// Name of the token to be created.
+    #[arg(long)]
+    token_name: String,
+
+    /// Principal of the token bridge canister.
+    #[arg(long)]
+    token_id: String,
+
+    /// Principal of the EVM canister.
+    #[arg(long)]
+    evm_canister: Principal,
 
     /// Hex-encoded PK to use to sign transaction. If not set, a random wallet will be created.
     #[arg(long)]
@@ -129,6 +173,8 @@ struct WalletAddressArgs {
 async fn main() {
     match CliCommand::parse() {
         CliCommand::DeployBftBridge(args) => deploy_bft_bridge(args).await,
+        CliCommand::DeployErc721Bridge(args) => deploy_erc721_bridge(args).await,
+        CliCommand::CreateNft(args) => create_nft(args).await,
         CliCommand::CreateToken(args) => create_token(args).await,
         CliCommand::CreateWallet(args) => create_wallet(args).await,
         CliCommand::BurnWrapped(args) => burn_wrapped(args).await,
@@ -274,6 +320,128 @@ async fn deploy_bft_bridge(args: DeployBftArgs) {
 
     eprintln!("Created BFT Bridge contract");
     println!("{bft_contract_address:#x}");
+}
+
+async fn deploy_erc721_bridge(args: DeployErc721Args) {
+    let minter = H160::from_slice(
+        &hex::decode(args.minter_address.trim_start_matches("0x"))
+            .expect("failed to parse minter address"),
+    );
+    let client = EvmCanisterClient::new(
+        IcAgentClient::with_identity(args.evm, IDENTITY_PATH, "http://127.0.0.1:4943", None)
+            .await
+            .expect("failed to create evm client"),
+    );
+    let wallet = get_wallet(&args.wallet, &client).await;
+
+    let chain_id = client.eth_chain_id().await.expect("failed to get chain id");
+
+    let input = erc721_bridge_api::CONSTRUCTOR
+        .encode_input(
+            ERC721_BRIDGE_SMART_CONTRACT_CODE.clone(),
+            &[Token::Address(minter)],
+        )
+        .unwrap();
+
+    let create_contract_tx = TransactionBuilder {
+        from: &wallet.address().into(),
+        to: None,
+        nonce: 0u64.into(),
+        value: 0u64.into(),
+        gas: 30_000_000u64.into(),
+        gas_price: Some((EIP1559_INITIAL_BASE_FEE * 2).into()),
+        input,
+        signature: SigningMethod::SigningKey(wallet.signer()),
+        chain_id: chain_id as _,
+    }
+    .calculate_hash_and_build()
+    .expect("Failed to sign the transaction");
+
+    let hash = client
+        .send_raw_transaction(create_contract_tx)
+        .await
+        .expect("Failed to send raw transaction")
+        .expect("Failed to execute crate ERC721 contract transaction");
+    let receipt = wait_for_tx_success(&client, hash).await;
+    let erc721_contract_address = receipt
+        .contract_address
+        .expect("Receipt did not contain contract address");
+
+    eprintln!("Created ERC721 Bridge contract");
+    println!("{erc721_contract_address:#x}");
+}
+
+async fn create_nft(args: CreateNftArgs) {
+    let erc721_bridge = H160::from_slice(
+        &hex::decode(args.erc721_bridge_address.trim_start_matches("0x"))
+            .expect("failed to parse erc721 bridge address"),
+    );
+
+    let token_principal =
+        Principal::from_str(&args.token_id).expect("Failed to parse token id from principal");
+    let token_id = Id256::from(&token_principal);
+
+    let client = EvmCanisterClient::new(
+        IcAgentClient::with_identity(
+            args.evm_canister,
+            IDENTITY_PATH,
+            "http://127.0.0.1:4943",
+            None,
+        )
+        .await
+        .expect("Failed to create client"),
+    );
+
+    let wallet = get_wallet(&args.wallet, &client).await;
+    let chain_id = client.eth_chain_id().await.expect("failed to get chain id");
+
+    let input = erc721_bridge_api::DEPLOY_WRAPPED_TOKEN
+        .encode_input(&[
+            Token::String(args.token_name.clone()),
+            Token::String(args.token_name),
+            Token::FixedBytes(token_id.0.to_vec()),
+        ])
+        .unwrap();
+
+    let nonce = client
+        .account_basic(wallet.address().into())
+        .await
+        .expect("Failed to get account info.")
+        .nonce;
+    let create_token_tx = TransactionBuilder {
+        from: &wallet.address().into(),
+        to: Some(erc721_bridge.into()),
+        nonce,
+        value: 0u64.into(),
+        gas: 3_000_000u64.into(),
+        gas_price: Some((EIP1559_INITIAL_BASE_FEE * 2).into()),
+        input,
+        signature: SigningMethod::SigningKey(wallet.signer()),
+        chain_id,
+    }
+    .calculate_hash_and_build()
+    .expect("failed to sign the transaction");
+
+    let hash = client
+        .send_raw_transaction(create_token_tx)
+        .await
+        .expect("Failed to send raw transaction")
+        .expect("Failed to execute crate token transaction");
+    let receipt = wait_for_tx_success(&client, hash).await;
+
+    let token_address = erc721_bridge_api::DEPLOY_WRAPPED_TOKEN
+        .decode_output(
+            &receipt
+                .output
+                .expect("Receipt for token creation does not contain output"),
+        )
+        .expect("Failed to decode token creation output")[0]
+        .clone()
+        .into_address()
+        .expect("Failed to decode token address");
+
+    eprintln!("Created token contract");
+    println!("{:#x}", token_address);
 }
 
 async fn create_token(args: CreateTokenArgs) {

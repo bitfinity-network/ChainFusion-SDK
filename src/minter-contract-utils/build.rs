@@ -24,8 +24,18 @@ fn main() -> anyhow::Result<()> {
     );
     set_contract_code(
         &contracts,
+        "WrappedERC721",
+        "BUILD_SMART_CONTRACT_WRAPPED_ERC721_HEX_CODE",
+    );
+    set_contract_code(
+        &contracts,
         "BFTBridge",
         "BUILD_SMART_CONTRACT_BFT_BRIDGE_HEX_CODE",
+    );
+    set_contract_code(
+        &contracts,
+        "ERC721Bridge",
+        "BUILD_SMART_CONTRACT_ERC721_BRIDGE_HEX_CODE",
     );
     set_deployed_contract_code(
         &contracts,

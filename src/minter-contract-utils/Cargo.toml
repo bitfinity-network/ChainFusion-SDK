@@ -7,22 +7,22 @@ edition.workspace = true
 test-contracts = []
 
 [dependencies]
-ethers-core = { workspace = true }
-did = { workspace = true }
+anyhow = { workspace = true }
 candid = { workspace = true }
-hex = { workspace = true }
-ic-stable-structures = { workspace = true }
-minter-did = { workspace = true }
-once_cell = { workspace = true }
-serde = { workspace = true }
-jsonrpc-core = { workspace = true }
-ic-canister-client = { workspace = true }
+did = { workspace = true }
+eth-signer = { workspace = true }
+ethers-core = { workspace = true }
 ethereum-json-rpc-client = { workspace = true, features = [
     "ic-canister-client",
     "http-outcall",
 ] }
-eth-signer = { workspace = true }
-anyhow = { workspace = true }
+hex = { workspace = true }
+ic-canister-client = { workspace = true }
+ic-stable-structures = { workspace = true }
+jsonrpc-core = { workspace = true }
+minter-did = { workspace = true }
+once_cell = { workspace = true }
+serde = { workspace = true }
 
 [build-dependencies]
 solidity-helper = { path = "../solidity-helper" }

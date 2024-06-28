@@ -2,7 +2,6 @@
 pragma solidity ^0.8.7;
 
 library RingBuffer {
-
     struct RingBufferUint32 {
         uint8 begin;
         uint8 end;
@@ -46,5 +45,4 @@ library RingBuffer {
             values[i] = value;
         }
     }
-
 }

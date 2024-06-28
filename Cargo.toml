@@ -8,6 +8,7 @@ members = [
     "src/solidity-helper",
     "src/btc-bridge",
     "src/rune-bridge",
+    "src/canister-factory",
 ]
 resolver = "2"
 
@@ -58,6 +59,7 @@ ord-rs = { git = "https://github.com/bitfinity-network/ord-rs", tag = "v0.1.2" }
 ordinals = "0.0.7"
 rand = { version = "0.8", features = ["std_rng", "small_rng"] }
 reqwest = { version = "0.12", default-features = false }
+sha3 = "0.10"
 serde = "1.0"
 serde_bytes = "0.11"
 serde_json = "1.0"

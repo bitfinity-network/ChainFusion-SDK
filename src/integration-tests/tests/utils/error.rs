@@ -28,6 +28,8 @@ pub enum TestError {
 
     #[error("{0}")]
     Generic(String),
+    #[error("Call error {0}")]
+    CallError(String),
 }
 
 #[derive(Debug, Error)]
@@ -52,7 +54,10 @@ impl From<ApproveError> for TestError {
 
 impl From<CallError> for TestError {
     fn from(e: CallError) -> Self {
-        e.into()
+        match e {
+            CallError::Reject(reject) => Self::CallError(reject),
+            CallError::UserError(user_err) => Self::CallError(user_err.to_string()),
+        }
     }
 }
 

@@ -25,7 +25,7 @@ pub struct State {
     pub evm_params: Option<EvmParams>,
 }
 
-#[derive(Debug, CandidType, Deserialize)]
+#[derive(Debug, CandidType, Deserialize, Clone)]
 pub struct BtcBridgeConfig {
     pub ck_btc_minter: Principal,
     pub ck_btc_ledger: Principal,

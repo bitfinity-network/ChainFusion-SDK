@@ -9,6 +9,4 @@ pub const OPERATIONS_MEMORY_ID: MemoryId = MemoryId::new(88);
 pub const OPERATIONS_LOG_MEMORY_ID: MemoryId = MemoryId::new(89);
 pub const OPERATIONS_MAP_MEMORY_ID: MemoryId = MemoryId::new(90);
 
-pub const DEFAULT_TX_GAS_LIMIT: u64 = 3_000_000;
-
 pub const IC_CHAIN_ID: u32 = 0;

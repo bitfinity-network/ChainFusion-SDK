@@ -151,7 +151,17 @@ deploy_bft_bridge() {
   FEE_CHARGE_ADDRESS="$4"
   IS_WRAPPED="$5"
 
-  BRIDGE_ADDRESS=$($CREATE_BFT_BRIDGE_TOOL deploy-bft-bridge --minter-address="$MINTER_ADDRESS" --evm="$EVM_PRINCIPAL" --wallet="$WALLET" --fee-charge-address="$FEE_CHARGE_ADDRESS" --is-wrapped-side="$IS_WRAPPED")
+  # If IS_WRAPPED is true, then pass the flag to the tool otherwise ignore it
+  if [ "$IS_WRAPPED" = "true" ]; then
+    IS_WRAPPED="--is-wrapped-side"
+  else
+    IS_WRAPPED=""
+  fi
+
+  BRIDGE_ADDRESS=$($CREATE_BFT_BRIDGE_TOOL deploy-bft-bridge --minter-address="$MINTER_ADDRESS" --evm="$EVM_PRINCIPAL" --wallet="$WALLET" --fee-charge-address="$FEE_CHARGE_ADDRESS" $IS_WRAPPED)
+
+  # extract the last line
+  BRIDGE_ADDRESS=$(echo "$BRIDGE_ADDRESS" | tail -n 1)
 
   echo "$BRIDGE_ADDRESS"
 }

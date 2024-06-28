@@ -1,6 +1,6 @@
 use access_list::AccessList;
 use candid::Principal;
-pub use config::Config;
+use config::Config;
 pub use eth_signer::sign_strategy::{SigningStrategy, TransactionSigner};
 use ic_stable_structures::stable_structures::DefaultMemoryImpl;
 use ic_stable_structures::{default_ic_memory_manager, VirtualMemory};
@@ -15,7 +15,7 @@ pub mod log;
 mod signer;
 
 /// State of a minter canister.
-pub struct State {
+pub(crate) struct State {
     /// Minter canister configuration.
     pub config: Config,
 
@@ -51,7 +51,7 @@ impl State {
 
 /// State settings.
 #[derive(Debug, Clone)]
-pub struct Settings {
+pub(crate) struct Settings {
     pub owner: Principal,
     pub evm_principal: Principal,
     pub signing_strategy: SigningStrategy,

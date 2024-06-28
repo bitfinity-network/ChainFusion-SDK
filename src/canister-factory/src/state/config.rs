@@ -2,29 +2,22 @@ use std::borrow::Cow;
 use std::cell::RefCell;
 
 use candid::{CandidType, Deserialize, Principal};
-use did::{codec, H160};
-use ethereum_json_rpc_client::{Client, EthJsonRpcClient};
-use evm_canister_client::IcCanisterClient;
+use did::codec;
 use ic_stable_structures::stable_structures::DefaultMemoryImpl;
 use ic_stable_structures::{CellStructure, StableCell, Storable, VirtualMemory};
-use minter_contract_utils::evm_bridge::EvmParams;
 
 use super::Settings;
-use crate::constant::CONFIG_MEMORY_ID;
-use crate::memory::MEMORY_MANAGER;
+use crate::memory::{CONFIG_MEMORY_ID, MEMORY_MANAGER};
 
 /// Minter canister configuration.
 #[derive(Default, Clone)]
-pub(crate) struct Config {}
+pub struct Config {}
 
 impl Config {
     /// Clear configuration and initialize it with data from `settings`.
     pub fn reset(&mut self, settings: Settings) {
         let new_data = ConfigData {
             owner: settings.owner,
-            evm_principal: settings.evm_principal,
-            evm_params: None,
-            bft_bridge_contract_address: None,
         };
 
         self.update_data(|data| *data = new_data);
@@ -38,45 +31,6 @@ impl Config {
     /// Sets a new principal for canister owner.
     pub fn set_owner(&mut self, owner: Principal) {
         self.update_data(|data| data.owner = owner);
-    }
-
-    /// Returns principal of EVM canister with which the minter canister works.
-    pub fn get_evm_principal(&self) -> Principal {
-        self.with_data(|data| data.get().evm_principal)
-    }
-
-    /// Sets principal of EVM canister with which the minter canister works.
-    pub fn set_evm_principal(&mut self, evm: Principal) {
-        self.update_data(|data| data.evm_principal = evm);
-    }
-
-    /// Returns parameters of EVM canister with which the minter canister works.
-    pub fn get_evm_params(&self) -> Option<EvmParams> {
-        self.with_data(|data| data.get().evm_params.clone())
-    }
-
-    /// Updates parameters of EVM canister with which the minter canister works.
-    pub fn update_evm_params<F: FnOnce(&mut EvmParams)>(&mut self, f: F) {
-        self.update_data(|data| {
-            let mut params = data.evm_params.clone().unwrap_or_default().clone();
-            f(&mut params);
-            data.evm_params = Some(params);
-        })
-    }
-
-    /// Returns EVM client
-    pub fn get_evm_client(&self) -> EthJsonRpcClient<impl Client> {
-        EthJsonRpcClient::new(IcCanisterClient::new(self.get_evm_principal()))
-    }
-
-    /// Returns bridge contract address for EVM.
-    pub fn get_bft_bridge_contract(&self) -> Option<H160> {
-        self.with_data(|data| data.get().bft_bridge_contract_address.clone())
-    }
-
-    /// Set bridge contract address for EVM.
-    pub fn set_bft_bridge_contract(&mut self, address: H160) {
-        self.update_data(|data| data.bft_bridge_contract_address = Some(address));
     }
 
     fn with_data<F, T>(&self, f: F) -> T
@@ -110,18 +64,12 @@ impl Config {
 #[derive(Debug, Clone, Deserialize, CandidType, PartialEq, Eq, serde::Serialize)]
 pub struct ConfigData {
     pub owner: Principal,
-    pub evm_principal: Principal,
-    pub evm_params: Option<EvmParams>,
-    pub bft_bridge_contract_address: Option<H160>,
 }
 
 impl Default for ConfigData {
     fn default() -> Self {
         Self {
             owner: Principal::management_canister(),
-            evm_principal: Principal::anonymous(),
-            evm_params: None,
-            bft_bridge_contract_address: None,
         }
     }
 }
@@ -177,7 +125,7 @@ mod tests {
 
         let settings = Settings {
             owner: Principal::management_canister(),
-            evm_principal: Principal::anonymous(),
+
             signing_strategy: SigningStrategy::Local {
                 private_key: [1u8; 32],
             },
@@ -186,7 +134,6 @@ mod tests {
         config.reset(settings.clone());
 
         assert_eq!(config.get_owner(), settings.owner);
-        assert_eq!(config.get_evm_principal(), settings.evm_principal);
     }
 
     #[test]
@@ -194,9 +141,7 @@ mod tests {
         let mut config = get_config();
 
         config.set_owner(Principal::management_canister());
-        config.set_evm_principal(Principal::management_canister());
 
         assert_eq!(config.get_owner(), Principal::management_canister());
-        assert_eq!(config.get_evm_principal(), Principal::management_canister());
     }
 }

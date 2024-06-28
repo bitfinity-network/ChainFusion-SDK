@@ -7,7 +7,6 @@ import "src/interfaces/IFeeCharge.sol";
 import { RingBuffer } from "src/libraries/RingBuffer.sol";
 
 contract FeeCharge is IFeeCharge {
-
     // Mapping from user address to amount of native tokens on his deposit.
     mapping(address => uint256) private _userBalance;
 
@@ -80,5 +79,4 @@ contract FeeCharge is IFeeCharge {
         _userBalance[from] = newBalance;
         to.transfer(amount);
     }
-
 }

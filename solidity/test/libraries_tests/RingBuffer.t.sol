@@ -6,7 +6,6 @@ import "forge-std/console.sol";
 import { RingBuffer } from "src/libraries/RingBuffer.sol";
 
 contract RingBufferTests is Test {
-
     using RingBuffer for RingBuffer.RingBufferUint32;
 
     RingBuffer.RingBufferUint32 _buffer;
@@ -36,5 +35,4 @@ contract RingBufferTests is Test {
         assertEq(_buffer.getAll()[0], 4);
         assertEq(_buffer.getAll()[254], 302);
     }
-
 }

@@ -73,7 +73,7 @@ impl Default for State {
     }
 }
 
-#[derive(Debug, CandidType, Deserialize)]
+#[derive(Debug, CandidType, Deserialize, Clone)]
 pub struct RuneBridgeConfig {
     pub network: BitcoinNetwork,
     pub evm_link: EvmLink,

@@ -1,40 +1,37 @@
 [package]
-name = "icrc2-minter"
+name = "canister-factory"
 version.workspace = true
 edition.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
 [features]
 default = []
 export-api = []
 
 [dependencies]
-async-recursion = { workspace = true }
+btc-bridge = { path = "../btc-bridge" }
 candid = { workspace = true }
 did = { workspace = true }
 eth-signer = { workspace = true, features = ["ic_sign"] }
+erc20-minter = { path = "../erc20-minter" }
 ethers-core = { workspace = true }
 ethereum-json-rpc-client = { workspace = true, features = [
     "ic-canister-client",
 ] }
 evm-canister-client = { workspace = true }
+hex = { workspace = true }
 ic-canister = { workspace = true }
 ic-exports = { workspace = true, features = ["icrc"] }
-ic-log = { workspace = true }
 ic-metrics = { workspace = true }
 ic-stable-structures = { workspace = true }
-ic-task-scheduler = { workspace = true }
 ic-storage = { workspace = true }
-icrc-client = { workspace = true }
-jsonrpc-core = { workspace = true }
-log = { workspace = true }
+icrc2-minter = { path = "../icrc2-minter" }
 minter-contract-utils = { path = "../minter-contract-utils" }
 minter-did = { workspace = true }
+rune-bridge = { path = "../rune-bridge" }
+thiserror = { workspace = true }
 serde = { workspace = true }
+sha3 = { workspace = true }
 
 [dev-dependencies]
-rand = { workspace = true }
 tokio = { workspace = true }
-
-[build-dependencies]
-vergen = { workspace = true }

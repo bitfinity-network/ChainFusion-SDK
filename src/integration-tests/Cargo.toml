@@ -11,23 +11,18 @@ bitcoin = { workspace = true, optional = true, features = ["rand-std"] }
 candid = { workspace = true }
 did = { workspace = true }
 eth-signer = { workspace = true }
-ethereum-json-rpc-client = { workspace = true, features = [
-    "reqwest",
-    "pocket-ic-tests-client",
-] }
-ethereum-types = { workspace = true }
 ethers-core = { workspace = true }
 evm-canister-client = { workspace = true }
 hex = { workspace = true }
 ic-btc-interface = { workspace = true }
-ic-canister = { workspace = true }
-ic-canister-client = { workspace = true, features = ["pocket-ic-client", "ic-agent-client"] }
+ic-canister-client = { workspace = true, features = [
+    "pocket-ic-client",
+    "ic-agent-client",
+] }
 ic-exports = { workspace = true, features = ["icrc", "ledger"] }
 icrc-client = { workspace = true }
 ic-log = { workspace = true }
-ic-stable-structures = { workspace = true }
 icrc2-minter = { path = "../icrc2-minter" }
-jsonrpc-core = { workspace = true }
 minter-client = { workspace = true }
 minter-contract-utils = { path = "../minter-contract-utils", features = [
     "test-contracts",
@@ -52,17 +47,12 @@ ic-management-canister-types = { workspace = true, optional = true }
 ic-state-machine-tests = { workspace = true, optional = true }
 
 [dev-dependencies]
-anyhow = { workspace = true }
 btc-bridge = { path = "../btc-bridge" }
-ethereum-json-rpc-client = { workspace = true, features = ["reqwest", "pocket-ic-tests-client"] }
-futures = { workspace = true, features = ["executor"] }
 ic-test-utils = { workspace = true }
-ic-agent = { workspace = true }
 ic-utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["fs", "process"] }
 erc20-minter = { path = "../erc20-minter" }
-signature-verification-canister-client = { workspace = true }
 rune-bridge = { path = "../rune-bridge" }
 
 # IC deps

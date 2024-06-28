@@ -5,7 +5,6 @@ import "forge-std/Test.sol";
 import "src/FeeCharge.sol";
 
 contract ChargeFeeTest is Test {
-
     address _alice = makeAddr("alice");
     bytes32 _aliceSender1 = bytes32(uint256(1));
     bytes32 _aliceSender2 = bytes32(uint256(2));
@@ -80,5 +79,4 @@ contract ChargeFeeTest is Test {
         vm.expectRevert();
         _feeCharge.chargeFee(_alice, payable(_recepient), _bobSender1, fee);
     }
-
 }

@@ -1,4 +1,7 @@
 {
+  "icrc2-minter": {
+    "ic": "drcah-cqaaa-aaaal-qjfva-cai"
+  },
   "minter": {
     "ic": "2op56-cyaaa-aaaak-afdqq-cai"
   },

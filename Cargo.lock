@@ -775,17 +775,14 @@ dependencies = [
 name = "bridge-tool"
 version = "0.2.0"
 dependencies = [
- "anyhow",
  "candid",
  "clap 4.5.7",
  "did",
  "eth-signer",
- "ethereum-json-rpc-client",
  "ethereum-types",
  "ethers-core",
  "evm-canister-client",
  "hex",
- "ic-agent",
  "ic-canister-client",
  "minter-contract-utils",
  "minter-did",
@@ -803,15 +800,12 @@ checksum = "771fe0050b883fcc3ea2359b1a96bcfbc090b7116eae7c3c512c7a083fdf23d3"
 name = "btc-bridge"
 version = "0.2.0"
 dependencies = [
- "anyhow",
  "candid",
  "did",
  "eth-signer",
- "ethereum-json-rpc-client",
  "ethers-core",
  "futures",
  "ic-canister",
- "ic-canister-client",
  "ic-ckbtc-minter",
  "ic-exports",
  "ic-log",
@@ -931,6 +925,34 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.68",
+]
+
+[[package]]
+name = "canister-factory"
+version = "0.2.0"
+dependencies = [
+ "btc-bridge",
+ "candid",
+ "did",
+ "erc20-minter",
+ "eth-signer",
+ "ethereum-json-rpc-client",
+ "ethers-core",
+ "evm-canister-client",
+ "hex",
+ "ic-canister",
+ "ic-exports",
+ "ic-metrics 0.17.0",
+ "ic-stable-structures 0.17.0",
+ "ic-storage",
+ "icrc2-minter",
+ "minter-contract-utils",
+ "minter-did",
+ "rune-bridge",
+ "serde",
+ "sha3",
+ "thiserror",
+ "tokio",
 ]
 
 [[package]]
@@ -1845,10 +1867,8 @@ dependencies = [
  "candid",
  "did",
  "eth-signer",
- "ethereum-json-rpc-client",
  "ethers-core",
  "ic-canister",
- "ic-canister-client",
  "ic-exports",
  "ic-log",
  "ic-metrics 0.17.0",
@@ -1951,7 +1971,6 @@ dependencies = [
  "itertools 0.13.0",
  "jsonrpc-core",
  "log",
- "reqwest 0.12.5",
  "serde",
  "serde_bytes",
  "serde_json",
@@ -4337,7 +4356,7 @@ dependencies = [
  "ic-interfaces-state-manager",
  "ic-replicated-state",
  "ic-types",
- "mockall 0.11.4",
+ "mockall",
 ]
 
 [[package]]
@@ -5465,14 +5484,12 @@ name = "icrc2-minter"
 version = "0.2.0"
 dependencies = [
  "async-recursion",
- "async-trait",
  "candid",
  "did",
  "eth-signer",
  "ethereum-json-rpc-client",
  "ethers-core",
  "evm-canister-client",
- "hex",
  "ic-canister",
  "ic-exports",
  "ic-log",
@@ -5485,10 +5502,8 @@ dependencies = [
  "log",
  "minter-contract-utils",
  "minter-did",
- "mockall 0.12.1",
  "rand",
  "serde",
- "thiserror",
  "tokio",
  "vergen",
 ]
@@ -5582,7 +5597,6 @@ dependencies = [
 name = "integration-tests"
 version = "0.2.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "bitcoin 0.31.2",
  "btc-bridge",
@@ -5590,17 +5604,12 @@ dependencies = [
  "did",
  "erc20-minter",
  "eth-signer",
- "ethereum-json-rpc-client",
- "ethereum-types",
  "ethers-core",
  "evm-canister-client",
- "futures",
  "hex",
- "ic-agent",
  "ic-base-types",
  "ic-bitcoin-canister-mock",
  "ic-btc-interface 0.2.2",
- "ic-canister",
  "ic-canister-client",
  "ic-canisters-http-types",
  "ic-ckbtc-kyt",
@@ -5610,13 +5619,11 @@ dependencies = [
  "ic-icrc1-ledger",
  "ic-log",
  "ic-management-canister-types",
- "ic-stable-structures 0.17.0",
  "ic-state-machine-tests",
  "ic-test-utils",
  "ic-utils 0.34.0",
  "icrc-client",
  "icrc2-minter",
- "jsonrpc-core",
  "minter-client",
  "minter-contract-utils",
  "minter-did",
@@ -5626,7 +5633,6 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_json",
- "signature-verification-canister-client",
  "solidity-helper",
  "thiserror",
  "tokio",
@@ -6074,23 +6080,8 @@ dependencies = [
  "downcast",
  "fragile",
  "lazy_static",
- "mockall_derive 0.11.4",
- "predicates 2.1.5",
- "predicates-tree",
-]
-
-[[package]]
-name = "mockall"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "43766c2b5203b10de348ffe19f7e54564b64f3d6018ff7648d1e2d6d3a0f0a48"
-dependencies = [
- "cfg-if 1.0.0",
- "downcast",
- "fragile",
- "lazy_static",
- "mockall_derive 0.12.1",
- "predicates 3.1.0",
+ "mockall_derive",
+ "predicates",
  "predicates-tree",
 ]
 
@@ -6104,18 +6095,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
-]
-
-[[package]]
-name = "mockall_derive"
-version = "0.12.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af7cbce79ec385a1d4f54baa90a76401eb15d9cab93685f62e7e9f942aa00ae2"
-dependencies = [
- "cfg-if 1.0.0",
- "proc-macro2",
- "quote",
- "syn 2.0.68",
 ]
 
 [[package]]
@@ -6772,16 +6751,6 @@ dependencies = [
  "normalize-line-endings",
  "predicates-core",
  "regex",
-]
-
-[[package]]
-name = "predicates"
-version = "3.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "68b87bfd4605926cdfefc1c3b5f8fe560e3feca9d5552cf68c466d3d8236c7e8"
-dependencies = [
- "anstyle",
- "predicates-core",
 ]
 
 [[package]]
@@ -7491,26 +7460,21 @@ checksum = "48fd7bd8a6377e15ad9d42a8ec25371b94ddc67abe7c8b9127bec79bebaaae18"
 name = "rune-bridge"
 version = "0.2.0"
 dependencies = [
- "anyhow",
  "async-trait",
  "bitcoin 0.31.2",
  "candid",
  "did",
  "eth-signer",
- "ethereum-json-rpc-client",
  "ethers-core",
- "evm-canister-client",
  "futures",
  "hex",
  "ic-canister",
- "ic-canister-client",
  "ic-exports",
  "ic-log",
  "ic-metrics 0.17.0",
  "ic-stable-structures 0.17.0",
  "ic-storage",
  "ic-task-scheduler",
- "jsonrpc-core",
  "log",
  "minter-contract-utils",
  "minter-did",
@@ -7518,7 +7482,6 @@ dependencies = [
  "ordinals",
  "serde",
  "serde_json",
- "tokio",
 ]
 
 [[package]]
@@ -8111,16 +8074,6 @@ checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
 dependencies = [
  "digest 0.10.7",
  "rand_core",
-]
-
-[[package]]
-name = "signature-verification-canister-client"
-version = "0.25.0"
-source = "git+https://github.com/bitfinity-network/bitfinity-evm-sdk?tag=v0.25.x#81b49b30c675e7c678dd69bf709114dd8399c899"
-dependencies = [
- "candid",
- "did",
- "ic-canister-client",
 ]
 
 [[package]]

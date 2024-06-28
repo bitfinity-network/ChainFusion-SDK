@@ -12,12 +12,7 @@ export-api = []
 anyhow = { workspace = true }
 candid = { workspace = true }
 did = { workspace = true }
-ethereum-json-rpc-client = { workspace = true, features = [
-    "ic-canister-client",
-    "http-outcall",
-] }
 ic-canister = { workspace = true }
-ic-canister-client = { workspace = true }
 ic-exports = { workspace = true, features = ["icrc"] }
 ic-metrics = { workspace = true }
 ic-stable-structures = { workspace = true }

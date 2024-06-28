@@ -38,7 +38,7 @@ mod inspect;
 
 /// A canister to transfer funds between IC token canisters and EVM canister contracts.
 #[derive(Canister, Clone)]
-pub struct MinterCanister {
+pub(crate) struct MinterCanister {
     #[id]
     id: Principal,
 }
@@ -150,7 +150,7 @@ impl MinterCanister {
     }
 
     /// set_logger_filter inspect_message check
-    pub fn set_logger_filter_inspect_message_check(
+    pub(crate) fn set_logger_filter_inspect_message_check(
         principal: Principal,
         state: &State,
     ) -> Result<()> {
@@ -176,7 +176,7 @@ impl MinterCanister {
     }
 
     /// ic_logs inspect_message check
-    pub fn ic_logs_inspect_message_check(principal: Principal, state: &State) -> Result<()> {
+    pub(crate) fn ic_logs_inspect_message_check(principal: Principal, state: &State) -> Result<()> {
         inspect_check_is_owner(principal, state)
     }
 
@@ -197,7 +197,7 @@ impl MinterCanister {
     }
 
     /// set_owner inspect_message check
-    pub fn set_owner_inspect_message_check(
+    pub(crate) fn set_owner_inspect_message_check(
         principal: Principal,
         owner: Principal,
         state: &State,
@@ -229,7 +229,7 @@ impl MinterCanister {
     }
 
     /// set_evm_principal inspect_message check
-    pub fn set_evm_principal_inspect_message_check(
+    pub(crate) fn set_evm_principal_inspect_message_check(
         principal: Principal,
         evm: Principal,
         state: &State,
@@ -375,7 +375,7 @@ impl MinterCanister {
     /// by different nodes of the IC subnet to reach a consensus, more info:
     /// https://internetcomputer.org/docs/current/developer-docs/integrations/http_requests/http_requests-how-it-works#transformation-function
     #[query]
-    fn transform(&self, raw: TransformArgs) -> HttpResponse {
+    pub fn transform(&self, raw: TransformArgs) -> HttpResponse {
         HttpResponse {
             status: raw.response.status,
             headers: raw.response.headers,
@@ -451,15 +451,15 @@ thread_local! {
     }));
 }
 
-pub fn get_scheduler() -> Rc<RefCell<PersistentScheduler>> {
+pub(crate) fn get_scheduler() -> Rc<RefCell<PersistentScheduler>> {
     SCHEDULER.with(|scheduler| scheduler.clone())
 }
 
-pub fn get_state() -> Rc<RefCell<State>> {
+pub(crate) fn get_state() -> Rc<RefCell<State>> {
     STATE.with(|state| state.clone())
 }
 
-pub fn get_operations_store(
+pub(crate) fn get_operations_store(
 ) -> MinterOperationStore<VirtualMemory<DefaultMemoryImpl>, OperationState> {
     MEMORY_MANAGER.with(|mm| {
         MinterOperationStore::with_memory(

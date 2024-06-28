@@ -6,7 +6,6 @@ import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 // Custom token contract based on ERC 20,
 contract WrappedToken is ERC20 {
-
     address public immutable owner;
     string private _name;
     string private _symbol;
@@ -97,5 +96,4 @@ contract WrappedToken is ERC20 {
     function decimals() public view virtual override returns (uint8) {
         return _decimals;
     }
-
 }

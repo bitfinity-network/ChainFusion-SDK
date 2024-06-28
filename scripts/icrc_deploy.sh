@@ -84,7 +84,7 @@ dfx deploy evm_testnet --argument "(record {
 
 dfx deploy icrc2-minter --argument "(record {
     evm_principal = principal \"$EVM\";
-    signing_strategy = variant { 
+    signing_strategy = variant {
         Local = record {
             private_key = blob \"\\01\\23\\45\\67\\89\\01\\23\\45\\67\\01\\01\\23\\45\\67\\89\\01\\23\\45\\67\\01\\01\\23\\45\\67\\89\\01\\23\\45\\67\\01\\67\\01\";
         }
@@ -92,6 +92,7 @@ dfx deploy icrc2-minter --argument "(record {
     log_settings = opt record {
         enable_console = true;
         log_filter = opt \"trace\";
+        in_memory_records = opt 10000;
     };
     owner = principal \"$ADMIN_PRINCIPAL\";
 })"
@@ -102,7 +103,7 @@ start_icx
 ETH_WALLET=$(cargo run -q -p bridge-tool -- create-wallet --evm-canister="$EVM")
 ETH_WALLET_ADDRESS=$(cargo run -q -p bridge-tool -- wallet-address --wallet="$ETH_WALLET")
 
-FEE_CHARGE_DEPLOY_TX_NONCE=0
+FEE_CHARGE_DEPLOY_TX_NONCE=2
 FEE_CHARGE_CONTRACT_ADDRESS=$(cargo run -q -p bridge-tool -- expected-contract-address --wallet="$ETH_WALLET" --nonce=$FEE_CHARGE_DEPLOY_TX_NONCE)
 
 res=$(dfx canister call icrc2-minter get_minter_canister_evm_address)
@@ -117,7 +118,7 @@ dfx canister call evm_testnet mint_native_tokens "(\"${ICRC2_MINTER_ECDSA_ADDRES
 echo "Deploying BftBridge contract"
 
 IS_WRAPPED="false"
-BFT_BRIDGE_ADDRESS=$(deploy_bft_bridge $EVM $ETH_WALLET_ADDRESS $ICRC2_MINTER_ECDSA_ADDRESS $FEE_CHARGE_CONTRACT_ADDRESS $IS_WRAPPED)
+BFT_BRIDGE_ADDRESS=$(deploy_bft_bridge $EVM $ETH_WALLET $ICRC2_MINTER_ECDSA_ADDRESS $FEE_CHARGE_CONTRACT_ADDRESS $IS_WRAPPED)
 
 echo "Got BftBridge address: ${BFT_BRIDGE_ADDRESS}"
 

@@ -9,15 +9,10 @@ default = []
 export-api = []
 
 [dependencies]
-anyhow = { workspace = true }
 candid = { workspace = true }
 did = { workspace = true }
-ethereum-json-rpc-client = { workspace = true, features = [
-    "ic-canister-client",
-] }
 futures = { workspace = true }
 ic-canister = { workspace = true }
-ic-canister-client = { workspace = true }
 ic-ckbtc-minter = { workspace = true }
 ic-exports = { workspace = true, features = ["icrc", "ledger"] }
 ic-metrics = { workspace = true }

@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 contract TestContractWithPrecompiles {
-
     // returns 0x4e03657aea45a94fc7d47ba826c8d667c0d1e6e33a64a036ec44f58fa12d6c45
     function do_keccak256() public pure returns (bytes32) {
         return (keccak256("abc"));
@@ -36,5 +35,4 @@ contract TestContractWithPrecompiles {
         uint8 _v = 0x1c;
         return (ecrecover(_hash, _v, _r, _s));
     }
-
 }

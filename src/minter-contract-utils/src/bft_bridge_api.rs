@@ -634,6 +634,19 @@ pub static LIST_TOKEN_PAIRS: Lazy<Function> = Lazy::new(|| Function {
     state_mutability: StateMutability::View,
 });
 
+#[allow(deprecated)] // need to initialize `constant` field
+pub static ADD_IMPLEMENTATION: Lazy<Function> = Lazy::new(|| Function {
+    name: "addAllowedImplementation".into(),
+    inputs: vec![Param {
+        name: "bytecodeHash".into(),
+        kind: ParamType::Bytes,
+        internal_type: None,
+    }],
+    outputs: vec![],
+    constant: None,
+    state_mutability: StateMutability::NonPayable,
+});
+
 pub fn mint_transaction(
     sender: H160,
     bridge: H160,

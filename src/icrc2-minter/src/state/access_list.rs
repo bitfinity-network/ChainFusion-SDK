@@ -2,7 +2,7 @@ use candid::Principal;
 use ic_stable_structures::stable_structures::Memory;
 use ic_stable_structures::{BTreeMapStructure, StableBTreeMap};
 
-pub struct AccessList<M: Memory> {
+pub(crate) struct AccessList<M: Memory> {
     pub access_list: StableBTreeMap<Principal, (), M>,
 }
 
@@ -22,23 +22,11 @@ impl<M: Memory> AccessList<M> {
         Ok(())
     }
 
-    pub fn batch_add(&mut self, principals: &[Principal]) -> minter_did::error::Result<()> {
-        for principal in principals {
-            self.add(*principal)?;
-        }
-
-        Ok(())
-    }
-
     pub fn get_all_principals(&self) -> Vec<Principal> {
         self.access_list
             .iter()
             .map(|(principal, _)| principal)
             .collect()
-    }
-
-    pub fn contains(&self, principal: &Principal) -> bool {
-        self.access_list.contains_key(principal)
     }
 
     pub fn remove(&mut self, principal: &Principal) {
@@ -53,6 +41,20 @@ mod tests {
     use super::*;
     use crate::constant::ACCESS_LIST_MEMORY_ID;
     use crate::memory::MEMORY_MANAGER;
+
+    impl<M: Memory> AccessList<M> {
+        pub fn contains(&self, principal: &Principal) -> bool {
+            self.access_list.contains_key(principal)
+        }
+
+        pub fn batch_add(&mut self, principals: &[Principal]) -> minter_did::error::Result<()> {
+            for principal in principals {
+                self.add(*principal)?;
+            }
+
+            Ok(())
+        }
+    }
 
     #[test]
     fn test_access_list() {

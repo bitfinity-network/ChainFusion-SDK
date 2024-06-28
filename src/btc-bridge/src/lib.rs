@@ -20,6 +20,10 @@ const MAINNET_CHAIN_ID: u32 = 0;
 const TESTNET_CHAIN_ID: u32 = 1;
 const REGTEST_CHAIN_ID: u32 = 2;
 
+/// A marker to identify the canister as the BTC bridge canister.
+#[no_mangle]
+pub static BTC_BRIDGE_CANISTER_MARKER: &str = "BTC_BRIDGE_CANISTER";
+
 pub fn idl() -> String {
     let btc_bridge_idl = BtcBridge::idl();
     let mut metrics_idl = <BtcBridge as Metrics>::get_idl();

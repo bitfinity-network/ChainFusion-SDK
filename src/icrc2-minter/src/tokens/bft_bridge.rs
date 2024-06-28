@@ -1,17 +1,5 @@
-use std::cell::RefCell;
-use std::rc::Rc;
-
-use did::{H160, U256};
-use eth_signer::sign_strategy::TransactionSigner;
-use ethereum_json_rpc_client::{Client, EthJsonRpcClient};
-use ethers_core::abi::Token;
-use ethers_core::types::TransactionRequest;
-use minter_contract_utils::bft_bridge_api::MINTER_CANISTER_ADDRESS;
-use minter_contract_utils::build_data::BFT_BRIDGE_SMART_CONTRACT_DEPLOYED_CODE;
-use minter_did::error::{Error, Result};
-
-use crate::constant::DEFAULT_TX_GAS_LIMIT;
-use crate::state::State;
+use did::U256;
+use minter_did::error::Result;
 
 /// This structure contains data of a valid burn operation.
 ///
@@ -111,69 +99,6 @@ impl<Src, Dst> ValidBurn<Src, Dst> {
             symbol: self.symbol,
             decimals: self.decimals,
         })
-    }
-}
-
-/// Checks if `evm` has valid BftBridge contract deployed.
-pub async fn check_bft_bridge_contract(
-    evm: &EthJsonRpcClient<impl Client>,
-    bft_address: H160,
-    state: Rc<RefCell<State>>,
-) -> Result<()> {
-    // Check Bft Bridge code
-    let code = evm
-        .get_code(bft_address.0, ethers_core::types::BlockNumber::Latest)
-        .await
-        .map_err(|e| Error::Internal(format!("failed to get bft bridge code: {}", e)))?;
-
-    let code_bytes = hex::decode(code.trim_start_matches("0x"))
-        .map_err(|e| format!("failed to decode bft bridge contract code: {}", e))?;
-
-    if code_bytes != *BFT_BRIDGE_SMART_CONTRACT_DEPLOYED_CODE {
-        return Err(Error::InvalidBftBridgeContract);
-    }
-
-    // Check owner
-    let signer = &state.borrow().signer.get_transaction_signer();
-    let minter_address = signer
-        .get_address()
-        .await
-        .map_err(|e| Error::from(format!("failed to get address: {e}")))?;
-    let data = MINTER_CANISTER_ADDRESS
-        .encode_input(&[])
-        .map_err(|e| Error::from(format!("failed to encode function arguments: {e}")))?;
-    let call_result = evm
-        .eth_call(
-            TransactionRequest {
-                from: Some(minter_address.0),
-                to: Some(bft_address.0.into()),
-                gas: Some(DEFAULT_TX_GAS_LIMIT.into()),
-                data: Some(data.into()),
-                ..Default::default()
-            },
-            ethers_core::types::BlockNumber::Latest,
-        )
-        .await
-        .map_err(|e| {
-            Error::from(format!(
-                "failed to read minter canister address from bft bridge: {e}"
-            ))
-        })?;
-
-    let call_result = hex::decode(call_result.trim_start_matches("0x"))
-        .map_err(|e| Error::from(format!("failed to decode call result: {e}")))?;
-    if let &[Token::Address(contract_minter_address)] = MINTER_CANISTER_ADDRESS
-        .decode_output(&call_result)
-        .map_err(|e| Error::from(format!("failed to decode call result: {e}")))?
-        .as_slice()
-    {
-        if H160::from(contract_minter_address) != minter_address {
-            Err(Error::InvalidBftBridgeContract)
-        } else {
-            Ok(())
-        }
-    } else {
-        Err(Error::from("invalid call result".to_string()))
     }
 }
 

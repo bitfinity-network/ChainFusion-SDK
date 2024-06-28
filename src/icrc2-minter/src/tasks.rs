@@ -78,7 +78,7 @@ impl BridgeTask {
         ScheduledTask::with_options(self, options)
     }
 
-    pub async fn init_evm_info(state: Rc<RefCell<State>>) -> Result<(), SchedulerError> {
+    pub(crate) async fn init_evm_info(state: Rc<RefCell<State>>) -> Result<(), SchedulerError> {
         log::trace!("evm info initialization started");
 
         let client = state.borrow().config.get_evm_client();
@@ -653,7 +653,7 @@ impl BridgeTask {
         }
     }
 
-    pub async fn update_evm_params(state: Rc<RefCell<State>>) -> Result<(), SchedulerError> {
+    pub(crate) async fn update_evm_params(state: Rc<RefCell<State>>) -> Result<(), SchedulerError> {
         let client = state.borrow().config.get_evm_client();
 
         let Some(initial_params) = state.borrow().config.get_evm_params() else {

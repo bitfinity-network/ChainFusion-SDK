@@ -4,7 +4,7 @@ use std::rc::Rc;
 use ic_metrics::Metrics;
 pub use state::SigningStrategy;
 
-pub use crate::canister::MinterCanister;
+pub(crate) use crate::canister::MinterCanister;
 
 mod build_data;
 pub mod canister;
@@ -16,6 +16,10 @@ mod tasks;
 pub mod tokens;
 
 type ForceNotSendAndNotSync = PhantomData<Rc<()>>;
+
+/// A marker to identify the canister as the ICRC bridge canister.
+#[no_mangle]
+pub static ICRC_CANISTER_MARKER: &str = "ICRC_BRIDGE_CANISTER";
 
 pub fn idl() -> String {
     let minter_canister_idl = MinterCanister::idl();

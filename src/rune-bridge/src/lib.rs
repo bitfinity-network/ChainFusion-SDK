@@ -22,10 +22,14 @@ const MAINNET_CHAIN_ID: u32 = 0;
 const TESTNET_CHAIN_ID: u32 = 1;
 const REGTEST_CHAIN_ID: u32 = 2;
 
+/// A marker to identify the canister as the RUNE bridge canister.
+#[no_mangle]
+pub static RUNE_BRIDGE_CANISTER_MARKER: &str = "RUNE_BRIDGE_CANISTER";
+
 pub fn idl() -> String {
-    let btc_bridge_idl = RuneBridge::idl();
+    let rune_bridge_idl = RuneBridge::idl();
     let mut metrics_idl = <RuneBridge as Metrics>::get_idl();
-    metrics_idl.merge(&btc_bridge_idl);
+    metrics_idl.merge(&rune_bridge_idl);
 
     candid::pretty::candid::compile(&metrics_idl.env.env, &Some(metrics_idl.actor))
 }

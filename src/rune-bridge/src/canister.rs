@@ -100,6 +100,8 @@ impl RuneBridge {
         self.set_timers();
     }
 
+
+    /// Returns the bitcoin address that a user has to use to deposit runes to be received on the given Ethereum address.
     #[query]
     pub fn get_deposit_address(&self, eth_address: H160) -> Result<String, GetAddressError> {
         crate::key::get_transit_address(&get_state(), &eth_address).map(|v| v.to_string())
@@ -190,6 +192,9 @@ impl RuneBridge {
         rune_info_amounts
     }
 
+    /// This was implemented for testing purposes.
+    /// It is not used in the production code.
+    /// To be removed. See: EPROD-935
     #[update]
     pub async fn create_edict_tx(&self, args: CreateEdictTxArgs) -> Vec<u8> {
         let from_addr = Address::from_str(&args.from_address)

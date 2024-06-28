@@ -18,7 +18,9 @@ use crate::memory::{LEDGER_MEMORY_ID, MEMORY_MANAGER, USED_UTXOS_REGISTRY_MEMORY
 
 /// Data structure to keep track of utxos owned by the canister.
 pub struct UtxoLedger {
+    /// contains a list of utxos on the main canister account (which get there as a change from withdrawal transactions)
     utxo_storage: StableBTreeMap<UtxoKey, UtxoDetails, VirtualMemory<DefaultMemoryImpl>>,
+    /// contains a list of utxos that are on user's deposit address.
     used_utxos_registry: StableBTreeMap<UtxoKey, UsedUtxoDetails, VirtualMemory<DefaultMemoryImpl>>,
 }
 

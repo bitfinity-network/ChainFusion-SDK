@@ -110,7 +110,7 @@ impl RuneBridge {
         &self,
         wallet_address: H160,
     ) -> Vec<(MinterOperationId, OperationState)> {
-        get_operations_store().get_for_address(&wallet_address)
+        get_operations_store().get_for_address(&wallet_address, None, None)
     }
 
     fn init_evm_info_task() -> ScheduledTask<RuneBridgeTask> {

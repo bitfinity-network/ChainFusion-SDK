@@ -8,7 +8,6 @@ use ic_exports::ic_kit::mock_principals::{alice, john};
 use ic_exports::pocket_ic::{CallError, ErrorCode, UserError};
 use minter_contract_utils::wrapped_token_api::ERC_20_ALLOWANCE;
 use minter_did::id256::Id256;
-use minter_did::order::SignedMintOrder;
 use minter_did::reason::ApproveAfterMint;
 
 use super::{init_bridge, PocketIcTestContext, JOHN};
@@ -196,9 +195,9 @@ async fn test_icrc2_token_canister_stopped() {
 
     ctx.advance_by_times(Duration::from_secs(2), 20).await;
 
-    let (_, refund_mint_order) = ctx
-        .client(ctx.canisters().icrc2_minter(), ADMIN)
-        .query::<_, Vec<(u32, SignedMintOrder)>>("list_mint_orders", (john_address, base_token_id))
+    let minter_client = ctx.icrc_minter_client(ADMIN);
+    let (_, refund_mint_order) = minter_client
+        .list_mint_orders(&john_address, &base_token_id, Some(0u64), Some(1024u64))
         .await
         .unwrap()[0];
 

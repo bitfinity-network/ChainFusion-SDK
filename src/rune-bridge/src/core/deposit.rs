@@ -211,7 +211,9 @@ impl<UTXO: UtxoProvider, INDEX: RuneIndexProvider> RuneDeposit<UTXO, INDEX> {
     }
 
     pub fn complete_mint_request(&mut self, dst_address: H160, order_nonce: u32) {
-        let requests = self.operation_store.get_for_address(&dst_address);
+        let requests = self
+            .operation_store
+            .get_for_address(&dst_address, None, None);
         for (request_id, request) in requests {
             if let OperationState::Deposit(payload) = request {
                 if let DepositRequestStatus::MintOrdersCreated { mut orders } =

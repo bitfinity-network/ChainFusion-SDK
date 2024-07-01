@@ -1,3 +1,4 @@
+use std::ffi::OsStr;
 use std::io::ErrorKind;
 use std::str::FromStr;
 use std::time::Duration;
@@ -255,23 +256,21 @@ impl RunesContext {
         self.inner.advance_time(Duration::from_secs(1)).await;
 
         let pwd = std::env::var("PWD").expect("PWD is not set");
-        let output = Command::new("bitcoin-core.cli")
-            .args([
-                &format!("-conf={pwd}/btc-deploy/bitcoin.conf"),
-                "-rpcwallet=admin",
-                "generatetoaddress",
-                &count.to_string(),
-                "bcrt1q7xzw9nzmsvwnvfrx6vaq5npkssqdylczjk8cts",
-            ])
-            .output()
-            .await;
+        let output = Self::bitcoin_cli([
+            &format!("-conf={pwd}/btc-deploy/bitcoin.conf"),
+            "-rpcwallet=admin",
+            "generatetoaddress",
+            &count.to_string(),
+            "bcrt1q7xzw9nzmsvwnvfrx6vaq5npkssqdylczjk8cts",
+        ])
+        .await;
 
         let result = match output {
             Ok(out) if out.status.success() => {
                 String::from_utf8(out.stdout).expect("invalid bitcoin-cli output")
             }
             Err(err) if err.kind() == ErrorKind::NotFound => {
-                panic!("`bitcoin-core.cli` cli tool not found")
+                panic!("neither `bitcoin-cli` or `bitcoin-core.cli` cli tool not found in PATH")
             }
             Err(err) => panic!("'ord' execution failed: {err:?}"),
             Ok(out) => panic!("'ord' exited with status code {}", out.status),
@@ -281,6 +280,28 @@ impl RunesContext {
 
         // Allow dfx and ord catch up with the new block
         self.inner.advance_time(Duration::from_secs(5)).await;
+    }
+
+    /// Tries to run `bitcoin-cli` or `bitcoin-core.cli` with the provided arguments.
+    async fn bitcoin_cli<I, S>(args: I) -> Result<std::process::Output, std::io::Error>
+    where
+        I: IntoIterator<Item = S> + Clone,
+        S: AsRef<OsStr>,
+    {
+        const CLI_NAMES: &[&str] = &["bitcoin-cli", "bitcoin-core.cli"];
+
+        for cli_name in CLI_NAMES {
+            match Command::new(cli_name).args(args.clone()).output().await {
+                Ok(output) => return Ok(output),
+                Err(err) if err.kind() == ErrorKind::NotFound => continue,
+                Err(err) => return Err(err),
+            }
+        }
+
+        Err(std::io::Error::new(
+            ErrorKind::NotFound,
+            format!("No bitcoin cli found in {:?}", CLI_NAMES),
+        ))
     }
 
     async fn deposit(

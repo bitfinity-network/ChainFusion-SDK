@@ -57,6 +57,10 @@ jobs:
         ./scripts/build_solidity.sh
         apt update && apt install -y npm wget curl
         cp btc-deploy/mkcert/* /etc/ssl/
+        wget -O /tmp/bitcoin.tar.gz https://bitcoin.org/bin/bitcoin-core-27.0/bitcoin-27.0-x86_64-linux-gnu.tar.gz
+        tar -xzf /tmp/bitcoin.tar.gz -C /tmp
+        cp /tmp/bitcoin-27.0/bin/bitcoin-cli /usr/bin/bitcoin-cli
+        curl -fsSL https://get.docker.com | sh -
       artifact-pre-script: |
         # Get external dependencies
         export WASMS_DIR="`pwd`/.artifact"
@@ -69,9 +73,9 @@ jobs:
       test-script: |
         export WASMS_DIR="`pwd`/.artifact"
 
+        ./scripts/tests/dfx_tests.sh --github-ci --docker
         ./scripts/tests/tests_i686.sh
         ./scripts/tests/tests.sh
-        ./scripts/tests/dfx_tests.sh --github-ci --docker
       enable-target-cache: true
       disable-cache: ${{ github.event.pull_request.base.ref == 'main' || github.ref_name == 'main' }}
     secrets:

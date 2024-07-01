@@ -13,20 +13,22 @@ usage() {
 }
 
 setup_docker() {
+    set -e
     PREV_PATH=$(pwd)
     cd btc-deploy/
-    docker compose up -d --build
+    docker compose up -d --build || docker-compose up -d --build
     cd $PREV_PATH
+    set +e
 }
 
 stop_docker() {
     PREV_PATH=$(pwd)
     cd btc-deploy/
-    docker compose down
+    docker compose down || docker-compose down
     cd $PREV_PATH
 }
 
-WITH_DOCKER="0"
+DOCKER="0"
 GITHUB_CI="0"
 
 ARGS=$(getopt -o h --long docker,github-ci,help -- "$@")
@@ -63,15 +65,12 @@ if [ "$GITHUB_CI" -gt 0 ]; then
     dfxvm default 0.18.0
 fi
 
-
 killall -9 icx-proxy || true
 dfx stop
 
-if [ "$WITH_DOCKER" -gt 0 ]; then
+if [ "$DOCKER" -gt 0 ]; then
     setup_docker
 fi
-
-set -e
 
 start_icx() {
     killall icx-proxy
@@ -84,10 +83,10 @@ start_icx() {
 
 rm -f "$LOGFILE"
 
-set +e
 dfx start --background --clean --enable-bitcoin 2> "$LOGFILE"
 start_icx
 
+dfx identity new --force max
 dfx identity use max
 wallet_principal=$(dfx identity get-wallet)
 echo "Wallet Principal: $wallet_principal"
@@ -95,12 +94,15 @@ dfx ledger fabricate-cycles --t 1000000 --canister $wallet_principal
 
 sleep 10
 
-cargo test -p integration-tests --features dfx_tests $1
+cargo test -p integration-tests --features dfx_tests $@
+TEST_RESULT=$?
 
 killall -9 icx-proxy || true
 
 dfx stop
 
-if [ "$WITH_DOCKER" -gt 0 ]; then
+if [ "$DOCKER" -gt 0 ]; then
     stop_docker
 fi
+
+exit $TEST_RESULT

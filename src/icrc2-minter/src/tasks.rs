@@ -265,6 +265,7 @@ impl BridgeTask {
             decimals: token_info.decimals,
             src_token: reason.icrc2_token_principal,
             recipient_address: reason.recipient_address,
+            erc20_token_address: reason.erc20_token_address,
             fee_payer: reason.fee_payer,
             approve_after_mint: reason.approve_after_mint,
         };
@@ -346,7 +347,7 @@ impl BridgeTask {
             sender,
             src_token,
             recipient: burnt_data.recipient_address,
-            dst_token: H160::default(), // will be selected in the contract.
+            dst_token: burnt_data.erc20_token_address,
             nonce,
             sender_chain_id,
             recipient_chain_id,
@@ -700,6 +701,7 @@ impl BridgeTask {
                     amount: burnt_event.amount,
                     src_token: to_token,
                     recipient_address: burnt_event.sender,
+                    erc20_token_address: burnt_event.from_erc20,
                     operation_id: operation_id.nonce(),
                     name,
                     symbol,
@@ -804,6 +806,7 @@ pub struct BurntIcrc2Data {
     pub amount: did::U256,
     pub src_token: Principal,
     pub recipient_address: did::H160,
+    pub erc20_token_address: did::H160,
     pub operation_id: u32,
     pub name: [u8; 32],
     pub symbol: [u8; 16],

@@ -11,13 +11,13 @@ abstract contract TokenManager is Initializable {
     using SafeERC20 for IERC20;
 
     // Indicates whether this contract is on the wrapped side
-    bool internal isWrappedSide;
+    bool internal _isWrappedSide;
 
-    /// Mapping from Base tokens to Wrapped tokens
-    mapping(bytes32 => address) internal _erc20TokenRegistry;
+    /// Mapping from `base token id` (can be anything, also ERC20 address) to Wrapped tokens ERC20 address
+    mapping(bytes32 => address) internal _baseToWrapped;
 
-    /// Mapping from Base tokens to Wrapped tokens
-    mapping(address => bytes32) internal _baseTokenRegistry;
+    /// Mapping from Wrapped ERC20 token address to base token id (can be anything, also ERC20 address)
+    mapping(address => bytes32) internal _wrappedToBase;
 
     /// List of wrapped tokens.
     address[] private _wrappedTokenList;
@@ -32,26 +32,26 @@ abstract contract TokenManager is Initializable {
         uint8 decimals;
     }
 
-    // Constructor or an initializer where you set this variable
-    // constructor(bool _isWrappedSide) {
-    //     isWrappedSide = _isWrappedSide;
-    // }
+    function _initialize(bool isWrappedSide) internal initializer {
+        _isWrappedSide = isWrappedSide;
+    }
 
-    function _initialize(bool _isWrappedSide) internal initializer {
-        isWrappedSide = _isWrappedSide;
+    /// @notice Checks if the contract is on the base side
+    /// @return true if the contract is on the base side
+    function isBaseSide() internal view returns (bool) {
+        return !_isWrappedSide;
     }
 
     /// Creates a new ERC20 compatible token contract as a wrapper for the given `externalToken`.
     function deployERC20(string memory name, string memory symbol, bytes32 baseTokenID) public returns (address) {
-        require(isWrappedSide, "Only for wrapped side");
-
-        require(_erc20TokenRegistry[baseTokenID] == address(0), "Wrapper already exist");
+        require(_isWrappedSide, "Only for wrapped side");
+        require(_baseToWrapped[baseTokenID] == address(0), "Wrapper already exist");
 
         // Create the new token
         WrappedToken wrappedERC20 = new WrappedToken(name, symbol, address(this));
 
-        _erc20TokenRegistry[baseTokenID] = address(wrappedERC20);
-        _baseTokenRegistry[address(wrappedERC20)] = baseTokenID;
+        _baseToWrapped[baseTokenID] = address(wrappedERC20);
+        _wrappedToBase[address(wrappedERC20)] = baseTokenID;
         _wrappedTokenList.push(address(wrappedERC20));
 
         emit WrappedTokenDeployedEvent(name, symbol, baseTokenID, address(wrappedERC20));
@@ -68,23 +68,23 @@ abstract contract TokenManager is Initializable {
     function getTokenMetadata(address token) internal view returns (TokenMetadata memory meta) {
         try IERC20Metadata(token).name() returns (string memory _name) {
             meta.name = StringUtils.truncateUTF8(_name);
-        } catch { }
+        } catch {}
         try IERC20Metadata(token).symbol() returns (string memory _symbol) {
             meta.symbol = bytes16(StringUtils.truncateUTF8(_symbol));
-        } catch { }
+        } catch {}
         try IERC20Metadata(token).decimals() returns (uint8 _decimals) {
             meta.decimals = _decimals;
-        } catch { }
+        } catch {}
     }
 
     /// Returns wrapped token for the given base token
     function getWrappedToken(bytes32 baseTokenID) external view returns (address) {
-        return _erc20TokenRegistry[baseTokenID];
+        return _baseToWrapped[baseTokenID];
     }
 
     /// Returns base token for the given wrapped token
     function getBaseToken(address wrappedTokenAddress) external view returns (bytes32) {
-        return _baseTokenRegistry[wrappedTokenAddress];
+        return _wrappedToBase[wrappedTokenAddress];
     }
 
     /// Returns list of token pairs.
@@ -95,7 +95,7 @@ abstract contract TokenManager is Initializable {
         for (uint256 i = 0; i < length; i++) {
             address wrappedToken = _wrappedTokenList[i];
             wrapped[i] = wrappedToken;
-            base[i] = _baseTokenRegistry[wrappedToken];
+            base[i] = _wrappedToBase[wrappedToken];
         }
     }
 }

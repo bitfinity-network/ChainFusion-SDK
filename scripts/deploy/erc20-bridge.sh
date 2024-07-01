@@ -13,8 +13,8 @@ function usage() {
   echo "  -m, --install-mode <mode>                       Install mode (create, init, reinstall, upgrade)"
   echo "  --base-evm <canister-id>                        Base EVM link canister ID"
   echo "  --wrapped-evm <canister-id>                     Wrapped EVM link canister ID"
-  echo "  --erc20-base-bridge-contract <canister-id>      ERC20 Base bridge contract canister ID"
-  echo "  --erc20-wrapped-bridge-contract <canister-id>   ERC20 Wrapped bridge contract canister ID"
+  echo "  --erc20-base-bridge-contract <address>          ERC20 Base bridge contract address"
+  echo "  --erc20-wrapped-bridge-contract <address>       ERC20 Wrapped bridge contract address"
 }
 
 ARGS=$(getopt -o e:i:m:h --long evm-rpc-url,ic-network,install-mode,base-evm,wrapped-evm,erc20-base-bridge-contract,erc20-wrapped-bridge-contract,help -- "$@")

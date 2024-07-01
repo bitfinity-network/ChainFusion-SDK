@@ -46,6 +46,7 @@ use ic_exports::icrc_types::icrc3::transactions::{
 };
 use ic_icrc1_ledger::{InitArgsBuilder as LedgerInitArgsBuilder, LedgerArgument};
 use ic_log::LogSettings;
+use ic_stable_structures::Storable;
 use ic_state_machine_tests::{Cycles, StateMachine, StateMachineBuilder, WasmResult};
 use minter_contract_utils::evm_link::EvmLink;
 use minter_did::id256::Id256;
@@ -200,6 +201,7 @@ struct CkBtcSetup {
     pub minter_id: CanisterId,
     pub kyt_id: CanisterId,
     pub tip_height: AtomicU32,
+    pub token_id: Id256,
     pub wrapped_token: H160,
     pub bft_bridge: H160,
 }
@@ -402,6 +404,7 @@ impl CkBtcSetup {
             kyt_id,
             wrapped_token: token,
             bft_bridge,
+            token_id,
             tip_height: AtomicU32::default(),
         }
     }
@@ -983,7 +986,7 @@ impl CkBtcSetup {
         .expect("minter self-check failed")
     }
 
-    pub fn btc_to_eth20(&self, eth_address: &H160) -> Vec<Result<Erc20MintStatus, Erc20MintError>> {
+    pub fn btc_to_erc20(&self, eth_address: &H160) -> Vec<Result<Erc20MintStatus, Erc20MintError>> {
         let payload = Encode!(eth_address).unwrap();
         let result = self
             .env()
@@ -1041,7 +1044,7 @@ impl CkBtcSetup {
         self.push_utxo(deposit_address, utxo.clone());
 
         self.advance_blocks(MIN_CONFIRMATIONS as usize);
-        let result = &self.btc_to_eth20(&caller_eth_address)[0];
+        let result = &self.btc_to_erc20(&caller_eth_address)[0];
         if let Ok(Erc20MintStatus::Minted { amount, .. }) = result {
             *amount
         } else {
@@ -1084,6 +1087,7 @@ impl CkBtcSetup {
                 &(&self.context).evm_client("admin"),
                 wallet,
                 from_token,
+                &self.token_id.to_bytes(),
                 recipient,
                 &self.bft_bridge,
                 amount as u128,
@@ -1193,7 +1197,7 @@ async fn btc_to_erc20_test() {
     let deposit_address = ckbtc.get_btc_address(deposit_account);
     ckbtc.push_utxo(deposit_address, utxo.clone());
 
-    let result = ckbtc.btc_to_eth20(&caller_eth_address);
+    let result = ckbtc.btc_to_erc20(&caller_eth_address);
     assert_eq!(
         result[0],
         Ok(Erc20MintStatus::Scheduled {
@@ -1213,7 +1217,7 @@ async fn btc_to_erc20_test() {
 
     ckbtc.advance_blocks(6);
 
-    let result = ckbtc.btc_to_eth20(&caller_eth_address);
+    let result = ckbtc.btc_to_erc20(&caller_eth_address);
     assert_eq!(
         result[0],
         Ok(Erc20MintStatus::Scheduled {
@@ -1233,16 +1237,18 @@ async fn btc_to_erc20_test() {
 
     ckbtc.advance_blocks(6);
 
-    let result = ckbtc.btc_to_eth20(&caller_eth_address);
+    let result = ckbtc.btc_to_erc20(&caller_eth_address);
     assert_eq!(result[0], Err(Erc20MintError::NothingToMint));
 
     (&ckbtc.context).advance_time(Duration::from_secs(2)).await;
 
     if let Ok(Erc20MintStatus::Minted { tx_id, .. }) = &result[0] {
-        let _receipt = (&ckbtc.context)
+        let receipt = (&ckbtc.context)
             .wait_transaction_receipt(tx_id)
             .await
             .unwrap();
+
+        println!("Receipt: {:#?}", receipt);
     }
 
     let expected_balance = (deposit_value - ckbtc.kyt_fee() - CKBTC_LEDGER_FEE) as u128;

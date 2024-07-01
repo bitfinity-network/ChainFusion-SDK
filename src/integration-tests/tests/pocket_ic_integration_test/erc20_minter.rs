@@ -6,6 +6,7 @@ use eth_signer::{Signer, Wallet};
 use ethers_core::abi::{Constructor, Param, ParamType, Token};
 use ethers_core::k256::ecdsa::SigningKey;
 use evm_canister_client::EvmCanisterClient;
+use ic_stable_structures::Storable as _;
 use minter_contract_utils::bft_bridge_api;
 use minter_contract_utils::build_data::test_contracts::TEST_WTM_HEX_CODE;
 use minter_contract_utils::build_data::{
@@ -31,6 +32,7 @@ pub struct ContextWithBridges {
     pub base_token_address: H160,
     pub wrapped_token_address: H160,
     pub fee_charge_address: H160,
+    pub token_id: Id256,
 }
 
 impl ContextWithBridges {
@@ -187,6 +189,7 @@ impl ContextWithBridges {
             base_token_address,
             wrapped_token_address,
             fee_charge_address,
+            token_id,
         }
     }
 
@@ -232,12 +235,22 @@ async fn test_external_bridging() {
             .client(ctx.context.canisters().external_evm(), ADMIN),
     );
 
+    // Advance time to perform two tasks in erc20-minter:
+    // 1. Minted event collection
+    // 2. Mint order removal
+    ctx.context
+        .advance_by_times(Duration::from_secs(2), 8)
+        .await;
+
+    let to_token_id = Id256::from_evm_address(&ctx.wrapped_token_address, CHAIN_ID as _);
+
     let burn_operation_id = ctx
         .context
         .burn_erc_20_tokens(
             &base_evm_client,
             &ctx.bob_wallet,
             &ctx.base_token_address,
+            &to_token_id.to_bytes(),
             alice_id,
             &ctx.base_bft_bridge,
             amount,
@@ -349,6 +362,14 @@ async fn native_token_deposit_increase_and_decrease() {
             .client(ctx.context.canisters().external_evm(), ADMIN),
     );
 
+    // Advance time to perform two tasks in erc20-minter:
+    // 1. Minted event collection
+    // 2. Mint order removal
+    ctx.context
+        .advance_by_times(Duration::from_secs(2), 8)
+        .await;
+
+    let to_token_id = Id256::from_evm_address(&ctx.wrapped_token_address, CHAIN_ID as _);
     // Perform an operation to pay a fee for it.
     let (burn_operation_id, _) = ctx
         .context
@@ -356,6 +377,7 @@ async fn native_token_deposit_increase_and_decrease() {
             &base_evm_client,
             &ctx.bob_wallet,
             &ctx.base_token_address,
+            &to_token_id.to_bytes(),
             alice_id,
             &ctx.base_bft_bridge,
             amount,
@@ -426,12 +448,22 @@ async fn mint_should_fail_if_not_enough_tokens_on_fee_deposit() {
             .client(ctx.context.canisters().external_evm(), ADMIN),
     );
 
+    // Advance time to perform two tasks in erc20-minter:
+    // 1. Minted event collection
+    // 2. Mint order removal
+    ctx.context
+        .advance_by_times(Duration::from_secs(2), 8)
+        .await;
+
+    let to_token_id = Id256::from_evm_address(&ctx.wrapped_token_address, CHAIN_ID as _);
+
     let burn_operation_id = ctx
         .context
         .burn_erc_20_tokens(
             &base_evm_client,
             &ctx.bob_wallet,
             &ctx.base_token_address,
+            &to_token_id.to_bytes(),
             alice_id,
             &ctx.base_bft_bridge,
             amount,

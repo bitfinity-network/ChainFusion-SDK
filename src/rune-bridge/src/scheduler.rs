@@ -156,8 +156,11 @@ impl RuneBridgeTask {
                 if let Some(notification) = RuneMinterNotification::decode(event) {
                     return match notification {
                         RuneMinterNotification::Deposit(payload) => {
-                            let request_id = RuneDeposit::get()
-                                .create_deposit_request(payload.dst_address, payload.amounts);
+                            let request_id = RuneDeposit::get().create_deposit_request(
+                                payload.dst_address,
+                                payload.erc20_address,
+                                payload.amounts,
+                            );
 
                             let deposit_task = RuneBridgeTask::Deposit(request_id);
                             Some(deposit_task.into_scheduled(TaskOptions::new()))
@@ -232,6 +235,7 @@ pub enum RuneMinterNotification {
 #[derive(Debug, Clone, CandidType, Deserialize)]
 pub struct RuneDepositRequestData {
     pub dst_address: H160,
+    pub erc20_address: H160,
     pub amounts: Option<HashMap<RuneName, u128>>,
 }
 

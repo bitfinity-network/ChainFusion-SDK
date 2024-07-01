@@ -57,6 +57,11 @@ pub static BURN: Lazy<Function> = Lazy::new(|| Function {
             internal_type: None,
         },
         Param {
+            name: "toTokenID".into(),
+            kind: ParamType::FixedBytes(32),
+            internal_type: None,
+        },
+        Param {
             name: "recipientID".into(),
             kind: ParamType::Bytes,
             internal_type: None,
@@ -333,7 +338,7 @@ impl TryFrom<RawLog> for BridgeEvent {
         BurntEventData::try_from(log.clone())
             .map(Self::Burnt)
             .or_else(|_| MintedEventData::try_from(log.clone()).map(Self::Minted))
-            .or_else(|_| NotifyMinterEventData::try_from(log).map(Self::Notify))
+            .or_else(|_| NotifyMinterEventData::try_from(log.clone()).map(Self::Notify))
     }
 }
 
@@ -659,7 +664,6 @@ pub fn mint_transaction(
         ..Default::default()
     }
 }
-
 /// Proxy contract
 pub mod proxy {
     use super::*;

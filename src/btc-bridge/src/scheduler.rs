@@ -127,7 +127,7 @@ impl BtcTask {
                 let remove_mint_order_task = BtcTask::RemoveMintOrder(minted);
                 return Some(remove_mint_order_task.into_scheduled(options));
             }
-            Ok(BridgeEvent::Notify(_)) => todo!(),
+            Ok(BridgeEvent::Notify(_)) => return None,
             Err(e) => log::warn!("collected log is incompatible with expected events: {e}"),
         }
 
